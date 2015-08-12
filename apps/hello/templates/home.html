@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block content %}
+  
+  <div class="row">
+     <div class="col-md-6">
+        <table class="table table-bordered">
+         <thead>
+           <tr>
+            <th colspan="2">Person</th>
+           </tr>
+        </thead>
+           <tr>
+             <td>Name:</td><td>{{ person.name }}</td>
+           </tr>
+           <tr>
+             <td>Surname:</td> <td>{{ person.surname }}</td>
+            </tr>
+           <tr>
+              <td>Date of birth:</td><td>{{ person.date_of_birth }}</td>
+           </tr>
+           <tr>
+              <td>Bio:</td> <td>{{ person.bio }}</td>
+             </tr>
+       </table>
+    </div>
+
+    <div class="col-md-6">
+       <table class="table table-bordered">
+         <thead>
+           <tr>
+            <th colspan="2">Contacts</th>
+           </tr>
+        </thead>
+
+        <tr>
+           <td>Email:</td><td>{{person.email}}</td>
+         </tr>
+        <tr>
+           <td>Jabber:</td><td> {{person.jabber}}</td>
+        </tr>
+        <tr>
+          <td>Skype id:</td><td> {{person.skype_id}}</td>
+        </tr>
+        <tr>
+           <td>Other contacts:</td><td>{{person.other}}</td>
+         </tr>
+
+   </table>
+  </div>
+  
+{% endblock content %}
