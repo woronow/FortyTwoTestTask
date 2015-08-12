@@ -6,7 +6,7 @@ from django.http import HttpRequest
 
 from datetime import date
 
-from .models import Person
+from .models import Person, RequestStore
 from .views import home_page
 
 
@@ -51,3 +51,25 @@ class HomePageTest(TestCase):
                         startswith(b'<!DOCTYPE html>'))
         self.assertIn(b'<title>Site Name</title>', response.content)
         self.assertTrue(response.content.strip().endswith(b'</html>'))
+
+
+class RequestStoreTest(TestCase):
+    def test_request_store(self):
+        """Test creating a new request and saving it to the database"""
+        request_store = RequestStore()
+        request_store.path = '/'
+        request_store.metod = 'GET'
+        
+        # check we can save it to the database
+        request_store.save()
+        
+        # now check we can find it in the database again
+        all_requests = RequestStore.objects.all()
+        self.assertEquals(len(all_requests), 2)
+        only_request = all_persons[0]
+        self.assertEquals(only_request, request_store)
+
+        # and check that it's saved its two attributes: path and method
+        self.assertEquals(only_request.path, '/')
+        self.assertEquals(only_request.method, 'GET')
+        
