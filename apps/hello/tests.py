@@ -11,7 +11,8 @@ from .views import home_page
 
 
 class PersonModelTests(TestCase):
-    def test_creating_a_new_person_and_saving_it_to_the_database(self):
+    def test_person(self):
+        """Test creating a new person and saving it to the database"""
         person = Person()
         person.name = 'Aleks'
         person.surname = 'Woronow'
@@ -21,8 +22,10 @@ class PersonModelTests(TestCase):
         person.jabber = '42cc@khavr.com'
         person.skype_id = ''
         person.other = ''
+
         # check we can save it to the database
         person.save()
+
         # now check we can find it in the database again
         all_persons = Person.objects.all()
         self.assertEquals(len(all_persons), 2)
@@ -35,11 +38,13 @@ class PersonModelTests(TestCase):
 
 
 class HomePageTest(TestCase):
-    def test_root_url_resolves_to_home_page_view(self):
+    def test_home_page(self):
+        """Test root url resolves to home_page view"""
         found = resolve('/')
         self.assertEqual(found.func.func_name, home_page.func_name)
 
     def test_home_page_returns_correct_html(self):
+        """Test home_page returns correct html"""
         request = HttpRequest()
         response = home_page(request)
         self.assertTrue(response.content.strip().
