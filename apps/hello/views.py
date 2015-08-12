@@ -4,6 +4,7 @@ from django.shortcuts import render
 
 from .models import Person
 
+
 def home_page(request):
     context = {}
     person = Person.objects.first()

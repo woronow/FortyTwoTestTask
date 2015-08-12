@@ -25,8 +25,8 @@ class PersonModelTests(TestCase):
         person.save()
         # now check we can find it in the database again
         all_persons = Person.objects.all()
-        self.assertEquals(len(all_persons), 1)
-        only_person = all_persons[0]
+        self.assertEquals(len(all_persons), 2)
+        only_person = all_persons[1]
         self.assertEquals(only_person, person)
 
         # and check that it's saved its two attributes: name and surname
@@ -42,6 +42,7 @@ class HomePageTest(TestCase):
     def test_home_page_returns_correct_html(self):
         request = HttpRequest()
         response = home_page(request)
-        self.assertTrue(response.content.strip().startswith(b'<!DOCTYPE html>'))
+        self.assertTrue(response.content.strip().
+                        startswith(b'<!DOCTYPE html>'))
         self.assertIn(b'<title>Site Name</title>', response.content)
         self.assertTrue(response.content.strip().endswith(b'</html>'))

@@ -16,6 +16,6 @@ class Person(models.Model):
                                 blank=True,
                                 max_length=250)
     other = models.TextField('other contact', blank=True)
-    
+
     def __str__(self):
         return '%s %s' % (self.surname, self.name)

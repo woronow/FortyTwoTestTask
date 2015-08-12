@@ -2,7 +2,9 @@
 
 {% block content %}
   
-        <table>
+  <div class="row">
+     <div class="col-md-6">
+        <table class="table table-bordered">
          <thead>
            <tr>
             <th colspan="2">Person</th>
@@ -23,8 +25,8 @@
        </table>
     </div>
 
-    
-       <table >
+    <div class="col-md-6">
+       <table class="table table-bordered">
          <thead>
            <tr>
             <th colspan="2">Contacts</th>
@@ -45,5 +47,6 @@
          </tr>
 
    </table>
- 
+  </div>
+  
 {% endblock content %}
