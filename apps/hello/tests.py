@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 from django.test import TestCase
 from django.core.urlresolvers import resolve
+from django.http import HttpRequest
 
 from datetime import date
 
@@ -26,9 +27,9 @@ class PersonModelTests(TestCase):
         all_persons = Person.objects.all()
         self.assertEquals(len(all_persons), 1)
         only_person = all_persons[0]
-        self.assertEquals(only_person, obj)
+        self.assertEquals(only_person, person)
 
-        # and check that it's saved its two attributes: name and date_of_birth
+        # and check that it's saved its two attributes: name and surname
         self.assertEquals(only_person.name, 'Aleks')
         self.assertEquals(only_person.surname, 'Woronow')
 
@@ -36,11 +37,11 @@ class PersonModelTests(TestCase):
 class HomePageTest(TestCase):
     def test_root_url_resolves_to_home_page_view(self):
         found = resolve('/')
-        self.assertEqual(found.func, home_page)
+        self.assertEqual(found.func.func_name, home_page.func_name)
 
     def test_home_page_returns_correct_html(self):
         request = HttpRequest()
         response = home_page(request)
-        self.assertTrue(response.content.startswith(b'<html>'))
+        self.assertTrue(response.content.strip().startswith(b'<!DOCTYPE html>'))
         self.assertIn(b'<title>Site Name</title>', response.content)
-        self.assertTrue(response.content.endswith(b'</html>')) 
+        self.assertTrue(response.content.strip().endswith(b'</html>'))
