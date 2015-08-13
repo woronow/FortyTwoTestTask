@@ -1,52 +1,23 @@
 {% extends "base.html" %}
 
 {% block content %}
-  
-  <div class="row">
+<div class="row">
      <div class="col-md-6">
-        <table class="table table-bordered">
-         <thead>
-           <tr>
-            <th colspan="2">Person</th>
-           </tr>
-        </thead>
-           <tr>
-             <td>Name:</td><td>{{ person.name }}</td>
-           </tr>
-           <tr>
-             <td>Surname:</td> <td>{{ person.surname }}</td>
-            </tr>
-           <tr>
-              <td>Date of birth:</td><td>{{ person.date_of_birth }}</td>
-           </tr>
-           <tr>
-              <td>Bio:</td> <td>{{ person.bio }}</td>
-             </tr>
-       </table>
-    </div>
-
-    <div class="col-md-6">
-       <table class="table table-bordered">
-         <thead>
-           <tr>
-            <th colspan="2">Contacts</th>
-           </tr>
-        </thead>
-
-        <tr>
-           <td>Email:</td><td>{{person.email}}</td>
-         </tr>
-        <tr>
-           <td>Jabber:</td><td> {{person.jabber}}</td>
-        </tr>
-        <tr>
-          <td>Skype id:</td><td> {{person.skype_id}}</td>
-        </tr>
-        <tr>
-           <td>Other contacts:</td><td>{{person.other}}</td>
-         </tr>
-
-   </table>
-  </div>
-  
+          <ul class="list-group"><strong>Person</strong>
+               <li class="list-group-item">Name: {{ person.name }}</li>
+               <li class="list-group-item">Surname: {{ person.surname }}</li>
+               <li class="list-group-item">Date of birth: {{ person.date_of_birth }}</li>
+               <li class="list-group-item">Bio: {{ person.bio }}</li>
+          </ul>
+     </div>      
+     <div class="col-md-6">
+          <ul class="list-group"><strong>Contacts</strong>
+               <li class="list-group-item">Email: {{person.email}}</li>
+               <li class="list-group-item">Jabber: {{person.jabber}}</li>
+               <li class="list-group-item">Skype id: {{person.skype_id}}</li>
+               <li class="list-group-item">Other contacts: {{person.other}}</li>
+          </ul>
+         
+     </div>     
+ </div>      
 {% endblock content %}

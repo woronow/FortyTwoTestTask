@@ -2,6 +2,8 @@
 from __future__ import unicode_literals
 from django.test import TestCase
 from django.core.urlresolvers import resolve
+from django.test.client import RequestFactory
+from django.core.urlresolvers import reverse
 from django.http import HttpRequest
 
 from datetime import date
@@ -49,5 +51,17 @@ class HomePageTest(TestCase):
         response = home_page(request)
         self.assertTrue(response.content.strip().
                         startswith(b'<!DOCTYPE html>'))
-        self.assertIn(b'<title>Site Name</title>', response.content)
+        self.assertIn(b'<title>Visiting Card</title>', response.content)
         self.assertTrue(response.content.strip().endswith(b'</html>'))
+
+
+class HomePageViewTest(TestCase):
+    def setUp(self):
+        self.factory = RequestFactory()
+
+    def test_home_page_view(self):
+        """Test view home_page"""
+        request = self.factory.get(reverse('hello:home'))
+        response = home_page(request)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('Aleks', response.content)
