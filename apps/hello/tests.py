@@ -5,13 +5,8 @@ from django.test import Client
 from django.test.client import RequestFactory
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import resolve
-<<<<<<< HEAD
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import AnonymousUser
-=======
-from django.test.client import RequestFactory
-from django.core.urlresolvers import reverse
->>>>>>> t1_contact_page
 from django.http import HttpRequest
 
 from datetime import date
@@ -143,6 +138,7 @@ class RequestAjaxTest(TestCase):
         response = c.get(reverse('hello:request_ajax'),
                          HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertIn('GET', response.content)
+
 
 class HomePageViewTest(TestCase):
     def setUp(self):
