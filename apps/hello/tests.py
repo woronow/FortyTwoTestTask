@@ -122,11 +122,9 @@ class RequestMiddlewareTests(TestCase):
         # middleware stores request to other pages 
         request = self.factory.get(reverse('hello:home'))
 
-         # if user logged-in
+        # if user logged-in
         request.user = self.user
         self.middleware.process_request(request)
         rs = RequestStore.objects.get(path="/")
         self.assertEqual(rs.method, 'GET')
         self.assertEqual(rs.user, request.user)
-        
-        
