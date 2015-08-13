@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from django.test import TestCase
+from django.test.client import RequestFactory
 from django.core.urlresolvers import resolve
+from django.core.urlresolvers import reverse
+from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
 
 from datetime import date
@@ -72,4 +75,58 @@ class RequestStoreTest(TestCase):
         # and check that it's saved its two attributes: path and method
         self.assertEquals(only_request.path, '/')
         self.assertEquals(only_request.method, 'GET')
+
+
+class RequestMiddlewareTests(TestCase):
+    def setUp(self):
+        self.factory = RequestFactory()
+        self.middleware = RequestMiddle()
+        self.user = get_user_model().objects.create(username="admin",
+                                                    email="admin@i.ua",
+                                                    password="admin")
+
+    def test_middleware(self):
+        """Test middleware RequestMiddle."""
+
+        # middleware don't store request to page that show request
+        request = self.factory.get(reverse('hello:request'))
+        
+        # if user logged-in
+        request.user = self.user
+        self.middleware.process_request(request)
+        rs = RequestStore.objects.all()
+        self.assertQuerysetEqual(rs, [])
+        
+        # if user is anonymous
+        request.user = AnonymousUser()
+        self.middleware.process_request(request)
+        rs = RequestStore.objects.all()
+        self.assertQuerysetEqual(rs, [])
+        
+        # middleware don't store request to ajax request
+        request = self.factory.get(reverse('hello:request_ajax'))
+        
+        # if user logged-in
+        request.user = self.user
+        self.middleware.process_request(request)
+        rs = RequestStore.objects.all()
+        self.assertQuerysetEqual(rs, [])
+        
+        # if user is anonymous
+        request.user = AnonymousUser()
+        self.middleware.process_request(request)
+        rs = RequestStore.objects.all()
+        self.assertQuerysetEqual(rs, [])
+        
+        
+        # middleware stores request to other pages 
+        request = self.factory.get(reverse('hello:home'))
+
+         # if user logged-in
+        request.user = self.user
+        self.middleware.process_request(request)
+        rs = RequestStore.objects.get(path="/")
+        self.assertEqual(rs.method, 'GET')
+        self.assertEqual(rs.user, request.user)
+        
         
