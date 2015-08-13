@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block title %} - {% endblock title %}
+{% block body_id %}requests{% endblock%}
+
+{% block content %}
+
+<h3>Requests</h3>
+
+<table id="request" class="table table-bordered"></table>
+
+{% endblock content %}
+
+{% block script %}<script src="{% static 'js/request.js' %}"></script>{% endblock script %}
