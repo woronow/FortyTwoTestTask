@@ -22,6 +22,7 @@ class Person(models.Model):
         return '%s %s' % (self.surname, self.name)
 
 
+@python_2_unicode_compatible
 class RequestStore(models.Model):
     path = models.CharField(max_length=250)
     method = models.CharField(max_length=10)
