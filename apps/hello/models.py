@@ -2,10 +2,8 @@
 from __future__ import unicode_literals
 from django.db import models
 from django.conf import settings
-from django.utils.encoding import python_2_unicode_compatible
 
 
-@python_2_unicode_compatible
 class Person(models.Model):
     name = models.CharField('name', max_length=250)
     surname = models.CharField('surname', max_length=250)
@@ -18,7 +16,7 @@ class Person(models.Model):
                                 max_length=250)
     other = models.TextField('other contact', blank=True)
 
-    def __str__(self):
+    def __unicode__(self):
         return '%s %s' % (self.surname, self.name)
 
 
@@ -31,7 +29,7 @@ class RequestStore(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     new_request = models.PositiveIntegerField(default=1)
 
-    def __str__(self):
+    def __unicode__(self):
         return "%s - %s" % (self.path, self.method)
 
     class Meta:

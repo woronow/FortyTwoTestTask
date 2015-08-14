@@ -36,7 +36,7 @@ class PersonModelTests(TestCase):
         all_persons = Person.objects.all()
         self.assertEquals(len(all_persons), 2)
         only_person = all_persons[1]
-        self.assertEquals(only_person, person)
+        self.assertEquals(str(only_person), str(person))
 
         # and check that it's saved its two attributes: name and surname
         self.assertEquals(only_person.name, 'Aleks')
@@ -73,7 +73,7 @@ class RequestStoreTest(TestCase):
         all_requests = RequestStore.objects.all()
         self.assertEquals(len(all_requests), 1)
         only_request = all_requests[0]
-        self.assertEquals(only_request, request_store)
+        self.assertEquals(str(only_request), str(request_store))
 
         # and check that it's saved its two attributes: path and method
         self.assertEquals(only_request.path, '/')
