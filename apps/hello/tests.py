@@ -45,9 +45,14 @@ class PersonModelTests(TestCase):
 
 class HomePageTest(TestCase):
     def test_home_page(self):
-        """Test root url resolves to home_page view"""
-        found = resolve('/')
-        self.assertEqual(found.func.func_name, home_page.func_name)
+        """Test home page"""
+        c = Client()
+        response = c.get(reverse('hello:home'))
+
+        person = Person.objects.first()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['person'], person)
 
     def test_home_page_returns_correct_html(self):
         """Test home_page returns correct html"""
@@ -143,10 +148,11 @@ class RequestAjaxTest(TestCase):
 class HomePageViewTest(TestCase):
     def setUp(self):
         self.factory = RequestFactory()
+        self.person = Person.objects.first()
 
     def test_home_page_view(self):
         """Test view home_page"""
         request = self.factory.get(reverse('hello:home'))
         response = home_page(request)
         self.assertEqual(response.status_code, 200)
-        self.assertIn('Aleks', response.content)
+        self.assertIn(self.person.name, response.content)
