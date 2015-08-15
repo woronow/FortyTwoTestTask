@@ -33,10 +33,14 @@
             <div class="page-header">
                     <h1>42 Coffee Cups Test Assignmen</h1>
              </div>
+             <ul class="nav nav-tabs">
+                <li role="presentation"><a href="{% url 'hello:home' %}">Home</a></li>
+                <li role="presentation"><a href="{% url 'hello:request' %}">Requests</a></li>
+            </ul>
         {% block content %}{% endblock content %}
         </div>
         
         <script src="{% static 'bootstrap-3.3.5-dist/js/bootstrap.min.js' %}"></script> 
-        {% block script %}{% endblock script %}
+        {% block script %}<script src="{% static 'js/request.js' %}"></script>{% endblock script %}
     </body>
 </html>

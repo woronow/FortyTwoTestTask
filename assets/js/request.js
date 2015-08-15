@@ -8,11 +8,17 @@ var helloRequest = (function($){
     $.each(j_data, function(i, val) {
       id += parseInt(val.fields.new_request, 10);
       if (i < 10 ){
-        items.push('<tr id="' + val.pk + '">'
+          if (parseInt(val.fields.new_request, 10) != 0){
+               items.push('<tr id="' + val.pk + '">'
+                          + '<td><strong>' + val.fields.path + '</strong></td>'
+                          + '<td><strong>'+ val.fields.method + '</strong></td>'
+                          + '</tr>');
+          }else{
+              items.push('<tr id="' + val.pk + '">'
                    + '<td>' + val.fields.path + '</td>'
                    + '<td>'+ val.fields.method + '</td>'
                    + '</tr>');
-
+          }
     }
    });
    var title = $('title').text().split('-')[1] || $('title').text();
@@ -37,5 +43,5 @@ var helloRequest = (function($){
 
 $(document).ready(function(){
     helloRequest.loadRequest();
-    setInterval(helloRequest.loadRequest, 10000);
+    setInterval(helloRequest.loadRequest, 500);
 });

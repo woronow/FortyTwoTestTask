@@ -4,10 +4,10 @@ from django.test import TestCase
 from django.test import Client
 from django.test.client import RequestFactory
 from django.contrib.auth import get_user_model
-from django.core.urlresolvers import resolve
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
+from .decorators import not_record_request
 
 from datetime import date
 
@@ -45,9 +45,14 @@ class PersonModelTests(TestCase):
 
 class HomePageTest(TestCase):
     def test_home_page(self):
-        """Test root url resolves to home_page view"""
-        found = resolve('/')
-        self.assertEqual(found.func.func_name, home_page.func_name)
+        """Test home page"""
+        c = Client()
+        response = c.get(reverse('hello:home'))
+
+        person = Person.objects.first()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['person'], person)
 
     def test_home_page_returns_correct_html(self):
         """Test home_page returns correct html"""
@@ -82,52 +87,45 @@ class RequestStoreTest(TestCase):
 
 class RequestMiddlewareTests(TestCase):
     def setUp(self):
+        self.client = Client()
         self.factory = RequestFactory()
         self.middleware = RequestMiddle()
+        self.request_store = RequestStore
         self.user = get_user_model().objects.get(id=1)
+
+    def test_middleware_is_included(self):
+        """Test for inclusion RequestMiddleware in project"""
+        self.client.get(reverse('hello:home'))
+        last_middleware_obj = self.request_store.objects.last()
+        self.assertEqual(last_middleware_obj.method, 'GET')
+        self.assertEqual(last_middleware_obj.path, reverse('hello:home'))
 
     def test_middleware(self):
         """Test middleware RequestMiddle."""
-
-        # middleware don't store request to page that show request
-        request = self.factory.get(reverse('hello:request'))
-
-        # if user logged-in
-        request.user = self.user
-        self.middleware.process_request(request)
-        rs = RequestStore.objects.all()
-        self.assertQuerysetEqual(rs, [])
-
-        # if user is anonymous
-        request.user = AnonymousUser()
-        self.middleware.process_request(request)
-        rs = RequestStore.objects.all()
-        self.assertQuerysetEqual(rs, [])
-
-        # middleware don't store request to ajax request
-        request = self.factory.get(reverse('hello:request_ajax'))
-
-        # if user logged-in
-        request.user = self.user
-        self.middleware.process_request(request)
-        rs = RequestStore.objects.all()
-        self.assertQuerysetEqual(rs, [])
-
-        # if user is anonymous
-        request.user = AnonymousUser()
-        self.middleware.process_request(request)
-        rs = RequestStore.objects.all()
-        self.assertQuerysetEqual(rs, [])
-
-        # middleware stores request to other pages
         request = self.factory.get(reverse('hello:home'))
 
-        # if user logged-in
+        # middleware don't store request to decorated function
+        decorated_func = not_record_request(home_page)
         request.user = self.user
-        self.middleware.process_request(request)
-        rs = RequestStore.objects.get(path="/")
-        self.assertEqual(rs.method, 'GET')
-        self.assertEqual(rs.user, request.user)
+        self.middleware.process_view(request,  decorated_func)
+        rs = RequestStore.objects.all()
+        self.assertQuerysetEqual(rs, [])
+
+        # middleware store request to undecorated function
+        request.user = self.user
+        self.middleware.process_view(request, home_page)
+        rs = self.request_store.objects.all()
+        self.assertEquals(len(rs), 1)
+        only_one_rs = rs[0]
+        self.assertEqual(only_one_rs.path, reverse('hello:home'))
+
+        # if user is anonymous
+        request.user = AnonymousUser()
+        self.middleware.process_view(request, home_page)
+        rs = self.request_store.objects.all()
+        self.assertEquals(len(rs), 2)
+        only_one_rs = rs[1]
+        self.assertEqual(only_one_rs.path, reverse('hello:home'))
 
 
 class RequestAjaxTest(TestCase):
@@ -143,10 +141,11 @@ class RequestAjaxTest(TestCase):
 class HomePageViewTest(TestCase):
     def setUp(self):
         self.factory = RequestFactory()
+        self.person = Person.objects.first()
 
     def test_home_page_view(self):
         """Test view home_page"""
         request = self.factory.get(reverse('hello:home'))
         response = home_page(request)
         self.assertEqual(response.status_code, 200)
-        self.assertIn('Aleks', response.content)
+        self.assertIn(self.person.name, response.content)
