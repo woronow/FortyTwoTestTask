@@ -7,6 +7,7 @@ from django.http import HttpResponse
 import json
 
 from .models import Person, RequestStore
+from .decorators import not_record_request
 
 
 def home_page(request):
@@ -16,10 +17,14 @@ def home_page(request):
     return render(request, 'home.html', context)
 
 
+@not_record_request
 def request_view(request):
+    if request.user.username == 'admin':
+        RequestStore.objects.filter(new_request=1).update(new_request=0)
     return render(request, 'request.html')
 
 
+@not_record_request
 def request_ajax(request):
     if request.is_ajax():
         request_list = RequestStore.objects.all()
