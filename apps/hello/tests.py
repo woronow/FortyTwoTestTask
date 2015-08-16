@@ -12,6 +12,7 @@ from .decorators import not_record_request
 from datetime import date
 
 from .models import Person, RequestStore
+from .forms import PersonForm
 from .views import home_page
 from apps.middleware.helloRequest import RequestMiddle
 
@@ -41,6 +42,10 @@ class PersonModelTests(TestCase):
         # and check that it's saved its two attributes: name and surname
         self.assertEquals(only_person.name, 'Aleks')
         self.assertEquals(only_person.surname, 'Woronow')
+
+        # check photo size maintaining aspect ratio
+        size_photo = only_person.gauge_height()
+        self.assertEqual(size_photo['h'], 200)
 
 
 class HomePageTest(TestCase):
@@ -130,12 +135,13 @@ class RequestMiddlewareTests(TestCase):
 
 class RequestAjaxTest(TestCase):
     def test_request_ajax_view(self):
-        """Test request ajax view"""
+        """Test request_ajax view"""
         RequestStore.objects.create(path='/', method='GET')
         c = Client()
         response = c.get(reverse('hello:request_ajax'),
                          HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertIn('GET', response.content)
+        self.assertEqual(response.status_code, 200)
 
 
 class HomePageViewTest(TestCase):
@@ -149,3 +155,64 @@ class HomePageViewTest(TestCase):
         response = home_page(request)
         self.assertEqual(response.status_code, 200)
         self.assertIn(self.person.name, response.content)
+
+
+class RequestViewTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.request_store = RequestStore
+
+    def test_request_view(self):
+        """Test view request_view"""
+
+        # middleware don't store request to request_view page
+        response = self.client.get(reverse('hello:request'))
+        all_store_obj = self.request_store.objects.all()
+        self.assertQuerysetEqual(all_store_obj, [])
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('Requests', response.content)
+
+        # middleware store request to home_page page
+        response = self.client.get(reverse('hello:home'))
+        all_store_obj = self.request_store.objects.all()
+        store_obj = all_store_obj[0]
+        self.assertEqual(len(all_store_obj), 1)
+        self.assertEqual(store_obj.path, reverse('hello:home'))
+        self.assertEqual(store_obj.new_request, 1)
+
+        # new_request fields update to 0, if request_page is requested by admin
+        self.client.login(username='admin', password='admin')
+        response = self.client.get(reverse('hello:request'))
+        all_store_obj = self.request_store.objects.all()
+        store_obj = all_store_obj[0]
+        self.assertEqual(len(all_store_obj), 1)
+        self.assertEqual(store_obj.new_request, 0)
+
+
+class FormTest(TestCase):
+    def test_form(self):
+        """Test form"""
+        form_data = {'name': '',
+                     'surname': 'Woronow',
+                     'date_of_birth': date(2105, 7, 14),
+                     'email': 'aleks.woronow@yandex.ru',
+                     'jabber': '42cc@khavr.com'}
+        form = PersonForm(data=form_data)
+
+        self.assertEqual(form.is_valid(), False)
+        self.assertEqual(form.errors['name'], ['This field is required.'])
+
+        form_data['name'] = 'Aleks'
+        form = PersonForm(data=form_data)
+
+        self.assertEqual(form.is_valid(), True)
+
+    def test_form_page_view(self):
+        """Test view form_page"""
+        c = Client()
+        response = c.get(reverse('hello:form'))
+        self.assertEqual(response.status_code, 302)
+
+        c.login(username='admin', password='admin')
+        response = c.get(reverse('hello:form'))
+        self.assertIn('name', response.content)
