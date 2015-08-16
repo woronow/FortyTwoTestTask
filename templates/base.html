@@ -36,11 +36,12 @@
              <ul class="nav nav-tabs">
                 <li role="presentation"><a href="{% url 'hello:home' %}">Home</a></li>
                 <li role="presentation"><a href="{% url 'hello:request' %}">Requests</a></li>
+                <li role="presentation"><a href="{% url 'hello:form' %}">Add contact</a></li>
             </ul>
         {% block content %}{% endblock content %}
         </div>
         
-        <script src="{% static 'bootstrap-3.3.5-dist/js/bootstrap.min.js' %}"></script> 
+        <script src="{% static 'bootstrap-3.3.5-dist/js/bootstrap.min.js' %}"></script>
         {% block script %}<script src="{% static 'js/request.js' %}"></script>{% endblock script %}
     </body>
 </html>
