@@ -225,14 +225,13 @@ class CommandsTestCase(TestCase):
         " Test showmodels command."
         out = StringIO()
         call_command('showmodels', stdout=out, stderr=out)
-        self.assertIn('Person - 0', out.getvalue())
+        self.assertIn('Person - 1', out.getvalue())
         self.assertIn('error:', out.getvalue())
-        
-        Person.objects.create(name='Aleks',
-                              surname='Woronow',
+
+        Person.objects.create(name='Ivan',
+                              surname='Ivanov',
                               date_of_birth=date(2105, 7, 14),
                               email='hello@i.ua',
                               jabber='42cc@khavr.com')
         call_command('showmodels', stdout=out, stderr=out)
-        self.assertIn('Person - 1', out.getvalue())
-                      
+        self.assertIn('Person - 2', out.getvalue())
