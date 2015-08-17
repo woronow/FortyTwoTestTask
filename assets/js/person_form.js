@@ -5,12 +5,12 @@ $(document).ready(function(){
                 focusInvalid: false,
                 focusCleanup: true,
                 name: {
-                    required: false,
+                    required: true,
                     minlength: 3,
                     maxlength: 16
                 },
                 surname: {
-                    required: false,
+                    required: true,
                     minlength: 3,
                     maxlength: 16
                 },
