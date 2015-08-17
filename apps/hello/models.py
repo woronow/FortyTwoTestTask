@@ -2,6 +2,9 @@
 from __future__ import unicode_literals
 from django.db import models
 from django.conf import settings
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
+from django.db.utils import OperationalError
 
 
 class Person(models.Model):
@@ -49,3 +52,44 @@ class RequestStore(models.Model):
 
     class Meta:
         ordering = ["-date"]
+
+
+class NoteModel(models.Model):
+    ACTION_TYPE = (
+        (0, 'created'),
+        (1, 'changed'),
+        (2, 'deleted')
+    )
+    model = models.CharField('model', max_length=50)
+    inst = models.CharField('instance', max_length=250)
+    action_type = models.PositiveIntegerField('action type',
+                                              max_length=1,
+                                              choices=ACTION_TYPE)
+
+    def __unicode__(self):
+        return "%s  %s: %s " % (self.model,
+                                self.get_action_type_display(),
+                                self.inst)
+
+
+@receiver([post_save, post_delete])
+def models_handler(sender, **kwargs):
+    model = sender.__name__
+    instance = kwargs.get('instance')
+    created = kwargs.get('created')
+    update_fields = kwargs.get('update_fields')
+    action_type = 2
+
+    if model != 'NoteModel':
+        if model != 'LogEntry':
+            if created is not None:
+                action_type = 0
+            elif update_fields is not None:
+                action_type = 1
+            try:
+                note = NoteModel(model=model,
+                                 inst=instance,
+                                 action_type=action_type)
+                note.save()
+            except OperationalError as err:
+                print err
