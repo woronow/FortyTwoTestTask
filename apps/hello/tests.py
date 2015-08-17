@@ -7,13 +7,15 @@ from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
-from .decorators import not_record_request
+from django.core.management import call_command
+from django.utils.six import StringIO
 
 from datetime import date
 
 from .models import Person, RequestStore
 from .forms import PersonForm
 from .views import home_page
+from .decorators import not_record_request
 from apps.middleware.helloRequest import RequestMiddle
 
 
@@ -216,3 +218,21 @@ class FormTest(TestCase):
         c.login(username='admin', password='admin')
         response = c.get(reverse('hello:form'))
         self.assertIn('name', response.content)
+
+
+class CommandsTestCase(TestCase):
+    def test_showmodels(self):
+        " Test showmodels command."
+        out = StringIO()
+        call_command('showmodels', stdout=out, stderr=out)
+        self.assertIn('Person - 0', out.getvalue())
+        self.assertIn('error:', out.getvalue())
+        
+        Person.objects.create(name='Aleks',
+                              surname='Woronow',
+                              date_of_birth=date(2105, 7, 14),
+                              email='hello@i.ua',
+                              jabber='42cc@khavr.com')
+        call_command('showmodels', stdout=out, stderr=out)
+        self.assertIn('Person - 1', out.getvalue())
+                      
