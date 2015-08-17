@@ -12,7 +12,7 @@ from django.utils.six import StringIO
 
 from datetime import date
 
-from .models import Person, RequestStore
+from .models import Person, RequestStore, NoteModel
 from .forms import PersonForm
 from .views import home_page
 from .decorators import not_record_request
@@ -235,3 +235,10 @@ class CommandsTestCase(TestCase):
                               jabber='42cc@khavr.com')
         call_command('showmodels', stdout=out, stderr=out)
         self.assertIn('Person - 2', out.getvalue())
+
+
+class NoteModelTestCase(TestCase):
+    def test_processor(self):
+        " Test processor."
+        note = NoteModel.objects.get(model='Person')
+        self.assertEqual(note.action_type, 1)
