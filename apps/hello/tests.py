@@ -241,4 +241,4 @@ class NoteModelTestCase(TestCase):
     def test_processor(self):
         " Test processor."
         note = NoteModel.objects.get(model='Person')
-        self.assertEqual(note.action_type, 1)
+        self.assertEqual(note.action_type, 0)
