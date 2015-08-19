@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from django.test import TestCase
-from django.test import Client
 from django.test.client import RequestFactory
 from django.core.urlresolvers import reverse
 from django.http import HttpRequest
 
-from ..models import Person, RequestStore
+from ..models import Person
 from ..views import home_page
 
 
@@ -75,4 +74,3 @@ class RequestViewTest(TestCase):
         self.assertContains(response,
                             '<h1>42 Coffee Cups Test Assignmen</h1>',
                             html=True)
-

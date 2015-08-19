@@ -8,7 +8,6 @@ from django.contrib.auth import get_user_model
 from datetime import date
 
 from ..models import Person, RequestStore, NoteModel
-from ..models import Person, RequestStore
 
 
 class PersonModelTests(TestCase):
@@ -117,6 +116,8 @@ class RequestStoreTest(TestCase):
         # and check that it's saved its two attributes: path and method
         self.assertEquals(only_request.path, '/')
         self.assertEquals(only_request.method, 'GET')
+        self.assertEquals(only_request.new_request, 1)
+        self.assertEquals(only_request.user, user)
 
 
 class NoteModelTestCase(TestCase):
@@ -124,6 +125,3 @@ class NoteModelTestCase(TestCase):
         " Test processor."
         note = NoteModel.objects.get(model='Person')
         self.assertEqual(note.action_type, 0)
-
-        self.assertEquals(only_request.new_request, 1)
-        self.assertEquals(only_request.user, user)
