@@ -15,9 +15,8 @@ class PersonModelTests(TestCase):
         person = Person()
 
         # test model blank and null fields validation
-        try:
+        with self.assertRaises(ValidationError) as err:
             person.full_clean()
-        except ValidationError as err:
             self.assertEquals(err.message_dict['name'][0],
                               Person._meta.get_field('name').
                               error_messages['blank'])
@@ -35,9 +34,8 @@ class PersonModelTests(TestCase):
         person.email = 'aleks@'
         person.jabber = '42cc'
         person.date_of_birth = 'sd'
-        try:
+        with self.assertRaises(ValidationError) as err:
             person.full_clean()
-        except ValidationError as err:
             self.assertEquals(err.message_dict['email'][0],
                               EmailValidator.message)
             self.assertEquals(err.message_dict['jabber'][0],
