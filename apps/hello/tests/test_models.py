@@ -18,18 +18,19 @@ class PersonModelTests(TestCase):
         # test model blank and null fields validation
         with self.assertRaises(ValidationError) as err:
             person.full_clean()
-            self.assertEquals(err.message_dict['name'][0],
-                              Person._meta.get_field('name').
-                              error_messages['blank'])
-            self.assertEquals(err.message_dict['surname'][0],
-                              Person._meta.get_field('surname').
-                              error_messages['blank'])
-            self.assertEquals(err.message_dict['email'][0],
-                              Person._meta.get_field('email').
-                              error_messages['blank'])
-            self.assertEquals(err.message_dict['date_of_birth'][0],
-                              Person._meta.get_field('date_of_birth').
-                              error_messages['null'])
+        err_dict = err.exception.message_dict
+        self.assertEquals(err_dict['name'][0],
+                          Person._meta.get_field('name').
+                          error_messages['blank'])
+        self.assertEquals(err_dict['surname'][0],
+                          Person._meta.get_field('surname').
+                          error_messages['blank'])
+        self.assertEquals(err_dict['email'][0],
+                          Person._meta.get_field('email').
+                          error_messages['blank'])
+        self.assertEquals(err_dict['date_of_birth'][0],
+                          Person._meta.get_field('date_of_birth').
+                          error_messages['null'])
 
         # test model email and date field validation
         person.email = 'aleks@'
@@ -37,13 +38,14 @@ class PersonModelTests(TestCase):
         person.date_of_birth = 'sd'
         with self.assertRaises(ValidationError) as err:
             person.full_clean()
-            self.assertEquals(err.message_dict['email'][0],
-                              EmailValidator.message)
-            self.assertEquals(err.message_dict['jabber'][0],
-                              EmailValidator.message)
-            self.assertIn(Person._meta.get_field('date_of_birth').
-                          error_messages['invalid'].format()[12:],
-                          err.message_dict['date_of_birth'][0])
+        err_dict = err.exception.message_dict
+        self.assertEquals(err_dict['email'][0],
+                          EmailValidator.message)
+        self.assertEquals(err_dict['jabber'][0],
+                          EmailValidator.message)
+        self.assertIn(Person._meta.get_field('date_of_birth').
+                      error_messages['invalid'].format()[12:],
+                      err_dict['date_of_birth'][0])
 
         # test cretae and save object
         person.name = 'Aleks'
