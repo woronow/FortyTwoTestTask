@@ -47,7 +47,7 @@ class HomePageTest(TestCase):
         self.assertContains(response, 'I was born ...')
 
     def test_home_page_returns_correct_html(self):
-        """Test home_page returns correct html"""
+        """Test home page returns correct html"""
         request = HttpRequest()
         response = home_page(request)
         self.assertTrue(response.content.strip().
