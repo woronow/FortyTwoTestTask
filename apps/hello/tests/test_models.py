@@ -3,10 +3,12 @@ from __future__ import unicode_literals
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 from django.core.validators import EmailValidator
+from django.contrib.auth import get_user_model
 
 from datetime import date
 
 from ..models import Person, RequestStore, NoteModel
+from ..models import Person, RequestStore
 
 
 class PersonModelTests(TestCase):
@@ -17,18 +19,19 @@ class PersonModelTests(TestCase):
         # test model blank and null fields validation
         with self.assertRaises(ValidationError) as err:
             person.full_clean()
-            self.assertEquals(err.message_dict['name'][0],
-                              Person._meta.get_field('name').
-                              error_messages['blank'])
-            self.assertEquals(err.message_dict['surname'][0],
-                              Person._meta.get_field('surname').
-                              error_messages['blank'])
-            self.assertEquals(err.message_dict['email'][0],
-                              Person._meta.get_field('email').
-                              error_messages['blank'])
-            self.assertEquals(err.message_dict['date_of_birth'][0],
-                              Person._meta.get_field('date_of_birth').
-                              error_messages['null'])
+        err_dict = err.exception.message_dict
+        self.assertEquals(err_dict['name'][0],
+                          Person._meta.get_field('name').
+                          error_messages['blank'])
+        self.assertEquals(err_dict['surname'][0],
+                          Person._meta.get_field('surname').
+                          error_messages['blank'])
+        self.assertEquals(err_dict['email'][0],
+                          Person._meta.get_field('email').
+                          error_messages['blank'])
+        self.assertEquals(err_dict['date_of_birth'][0],
+                          Person._meta.get_field('date_of_birth').
+                          error_messages['null'])
 
         # test model email and date field validation
         person.email = 'aleks@'
@@ -36,13 +39,14 @@ class PersonModelTests(TestCase):
         person.date_of_birth = 'sd'
         with self.assertRaises(ValidationError) as err:
             person.full_clean()
-            self.assertEquals(err.message_dict['email'][0],
-                              EmailValidator.message)
-            self.assertEquals(err.message_dict['jabber'][0],
-                              EmailValidator.message)
-            self.assertIn(Person._meta.get_field('date_of_birth').
-                          error_messages['invalid'].format()[12:],
-                          err.message_dict['date_of_birth'][0])
+        err_dict = err.exception.message_dict
+        self.assertEquals(err_dict['email'][0],
+                          EmailValidator.message)
+        self.assertEquals(err_dict['jabber'][0],
+                          EmailValidator.message)
+        self.assertIn(Person._meta.get_field('date_of_birth').
+                      error_messages['invalid'].format()[12:],
+                      err_dict['date_of_birth'][0])
 
         # test cretae and save object
         person.name = 'Aleks'
@@ -77,9 +81,29 @@ class PersonModelTests(TestCase):
 class RequestStoreTest(TestCase):
     def test_request_store(self):
         """Test creating a new request and saving it to the database"""
+
         request_store = RequestStore()
         request_store.path = '/'
         request_store.method = 'GET'
+
+        user = get_user_model().objects.get(id=1)
+        request_store = RequestStore()
+
+        # test model blank and null fields validation
+        with self.assertRaises(ValidationError) as err:
+            request_store.full_clean()
+        err_dict = err.exception.message_dict
+        self.assertEquals(err_dict['path'][0],
+                          RequestStore._meta.get_field('path').
+                          error_messages['blank'])
+        self.assertEquals(err_dict['method'][0],
+                          RequestStore._meta.get_field('method').
+                          error_messages['blank'])
+
+        # test cretae and save object
+        request_store.path = '/'
+        request_store.method = 'GET'
+        request_store.user = user
 
         # check we can save it to the database
         request_store.save()
@@ -100,3 +124,6 @@ class NoteModelTestCase(TestCase):
         " Test processor."
         note = NoteModel.objects.get(model='Person')
         self.assertEqual(note.action_type, 0)
+
+        self.assertEquals(only_request.new_request, 1)
+        self.assertEquals(only_request.user, user)

@@ -53,42 +53,26 @@ class HomePageTest(TestCase):
 
 class RequestAjaxTest(TestCase):
     def test_request_ajax_view(self):
-        """Test request_ajax view"""
-        RequestStore.objects.create(path='/', method='GET')
-        c = Client()
-        response = c.get(reverse('hello:request_ajax'),
-                         HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+
+        """Test request ajax view"""
+        response = self.client.get(reverse('hello:home'))
+        response = self.client.get(reverse('hello:request_ajax'),
+                                   HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        self.assertIn('method', response.content)
         self.assertIn('GET', response.content)
-        self.assertEqual(response.status_code, 200)
+        self.assertIn('path', response.content)
+        self.assertIn('/', response.content)
 
 
 class RequestViewTest(TestCase):
-    def setUp(self):
-        self.client = Client()
-        self.request_store = RequestStore
-
     def test_request_view(self):
-        """Test view request_view"""
+        """Test request_view view"""
 
-        # middleware don't store request to request_view page
         response = self.client.get(reverse('hello:request'))
-        all_store_obj = self.request_store.objects.all()
-        self.assertQuerysetEqual(all_store_obj, [])
+
+        self.assertTemplateUsed(response, 'request.html')
         self.assertEqual(response.status_code, 200)
-        self.assertIn('Requests', response.content)
+        self.assertContains(response,
+                            '<h1>42 Coffee Cups Test Assignmen</h1>',
+                            html=True)
 
-        # middleware store request to home_page page
-        response = self.client.get(reverse('hello:home'))
-        all_store_obj = self.request_store.objects.all()
-        store_obj = all_store_obj[0]
-        self.assertEqual(len(all_store_obj), 1)
-        self.assertEqual(store_obj.path, reverse('hello:home'))
-        self.assertEqual(store_obj.new_request, 1)
-
-        # new_request fields update to 0, if request_page is requested by admin
-        self.client.login(username='admin', password='admin')
-        response = self.client.get(reverse('hello:request'))
-        all_store_obj = self.request_store.objects.all()
-        store_obj = all_store_obj[0]
-        self.assertEqual(len(all_store_obj), 1)
-        self.assertEqual(store_obj.new_request, 0)
