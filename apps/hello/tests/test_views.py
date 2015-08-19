@@ -60,3 +60,16 @@ class RequestAjaxTest(TestCase):
         self.assertIn('GET', response.content)
         self.assertIn('path', response.content)
         self.assertIn('/', response.content)
+
+
+class RequestViewTest(TestCase):
+    def test_request_view(self):
+        """Test request_view view"""
+
+        response = self.client.get(reverse('hello:request'))
+
+        self.assertTemplateUsed(response, 'request.html')
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response,
+                            '<h1>42 Coffee Cups Test Assignmen</h1>',
+                            html=True)
