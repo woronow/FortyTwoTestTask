@@ -3,16 +3,11 @@ from __future__ import unicode_literals
 from django.test import TestCase
 from django.test import Client
 from django.test.client import RequestFactory
-from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
-from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
-from django.core.management import call_command
-from django.utils.six import StringIO
 
-from ..models import Person
+from ..models import Person, RequestStore
 from ..views import home_page
-from ..decorators import not_record_request
 
 
 class HomePageViewTest(TestCase):
