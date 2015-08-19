@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 from django.core.validators import EmailValidator
+from django.contrib.auth import get_user_model
 
 from datetime import date
 
@@ -73,10 +74,24 @@ class PersonModelTests(TestCase):
 class RequestStoreTest(TestCase):
     def test_request_store(self):
         """Test creating a new request and saving it to the database"""
+        user = get_user_model().objects.get(id=1)
         request_store = RequestStore()
+
+        # test model blank and null fields validation
+        with self.assertRaises(ValidationError) as err:
+            request_store.full_clean()
+        err_dict = err.exception.message_dict
+        self.assertEquals(err_dict['path'][0],
+                          RequestStore._meta.get_field('path').
+                          error_messages['blank'])
+        self.assertEquals(err_dict['method'][0],
+                          RequestStore._meta.get_field('method').
+                          error_messages['blank'])
+
+        # test cretae and save object
         request_store.path = '/'
         request_store.method = 'GET'
-
+        request_store.user = user
         # check we can save it to the database
         request_store.save()
 
@@ -89,3 +104,5 @@ class RequestStoreTest(TestCase):
         # and check that it's saved its two attributes: path and method
         self.assertEquals(only_request.path, '/')
         self.assertEquals(only_request.method, 'GET')
+        self.assertEquals(only_request.new_request, 1)
+        self.assertEquals(only_request.user, user)

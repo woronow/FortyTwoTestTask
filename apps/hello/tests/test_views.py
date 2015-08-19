@@ -5,7 +5,7 @@ from django.test.client import RequestFactory
 from django.core.urlresolvers import reverse
 from django.http import HttpRequest
 
-from ..models import Person, RequestStore
+from ..models import Person
 from ..views import home_page
 
 
@@ -53,7 +53,10 @@ class HomePageTest(TestCase):
 class RequestAjaxTest(TestCase):
     def test_request_ajax_view(self):
         """Test request ajax view"""
-        RequestStore.objects.create(path='/', method='GET')
+        response = self.client.get(reverse('hello:home'))
         response = self.client.get(reverse('hello:request_ajax'),
-                         HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+                                   HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        self.assertIn('method', response.content)
         self.assertIn('GET', response.content)
+        self.assertIn('path', response.content)
+        self.assertIn('/', response.content)

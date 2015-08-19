@@ -4,8 +4,12 @@ from django.test import TestCase
 from django.test.client import RequestFactory
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
+from django.core.urlresolvers import reverse
 
 from ..models import RequestStore
+from apps.middleware.helloRequest import RequestMiddle
+from ..decorators import not_record_request
+from ..views import home_page
 
 
 class RequestMiddlewareTests(TestCase):
