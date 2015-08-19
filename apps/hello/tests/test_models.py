@@ -1,33 +1,58 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from django.test import TestCase
-from django.test import Client
-from django.test.client import RequestFactory
-from django.contrib.auth import get_user_model
-from django.core.urlresolvers import reverse
-from django.contrib.auth.models import AnonymousUser
-from django.http import HttpRequest
-from django.core.management import call_command
-from django.utils.six import StringIO
+from django.core.exceptions import ValidationError
+from django.core.validators import EmailValidator
 
 from datetime import date
 
-from .models import Person, RequestStore, NoteModel
-from .forms import PersonForm
-from .views import home_page
-from .decorators import not_record_request
+from ..models import Person, RequestStore, NoteModel
+from ..forms import PersonForm
 from apps.middleware.helloRequest import RequestMiddle
 
-
 class PersonModelTests(TestCase):
-    def test_person(self):
+    def test_person_model(self):
         """Test creating a new person and saving it to the database"""
         person = Person()
+
+        # test model blank and null fields validation
+        try:
+            person.full_clean()
+        except ValidationError as err:
+            self.assertEquals(err.message_dict['name'][0],
+                              Person._meta.get_field('name').
+                              error_messages['blank'])
+            self.assertEquals(err.message_dict['surname'][0],
+                              Person._meta.get_field('surname').
+                              error_messages['blank'])
+            self.assertEquals(err.message_dict['email'][0],
+                              Person._meta.get_field('email').
+                              error_messages['blank'])
+            self.assertEquals(err.message_dict['date_of_birth'][0],
+                              Person._meta.get_field('date_of_birth').
+                              error_messages['null'])
+
+        # test model email and date field validation
+        person.email = 'aleks@'
+        person.jabber = '42cc'
+        person.date_of_birth = 'sd'
+        try:
+            person.full_clean()
+        except ValidationError as err:
+            self.assertEquals(err.message_dict['email'][0],
+                              EmailValidator.message)
+            self.assertEquals(err.message_dict['jabber'][0],
+                              EmailValidator.message)
+            self.assertIn(Person._meta.get_field('date_of_birth').
+                          error_messages['invalid'].format()[12:],
+                          err.message_dict['date_of_birth'][0])
+
+        # test cretae and save object
         person.name = 'Aleks'
         person.surname = 'Woronow'
         person.date_of_birth = date(2105, 7, 14)
-        person.bio = 'I wasborn ...'
-        person.email = 'akeks.woronow@yandex.ru'
+        person.bio = 'I was born ...'
+        person.email = 'aleks.woronow@yandex.ru'
         person.jabber = '42cc@khavr.com'
         person.skype_id = ''
         person.other = ''
@@ -39,36 +64,17 @@ class PersonModelTests(TestCase):
         all_persons = Person.objects.all()
         self.assertEquals(len(all_persons), 2)
         only_person = all_persons[1]
-        self.assertEquals(str(only_person), str(person))
+        self.assertEquals(only_person, person)
 
         # and check that it's saved its two attributes: name and surname
         self.assertEquals(only_person.name, 'Aleks')
         self.assertEquals(only_person.surname, 'Woronow')
-
+        self.assertEquals(only_person.bio, 'I was born ...')
+        self.assertEquals(str(only_person), 'Woronow Aleks')
+        
         # check photo size maintaining aspect ratio
         size_photo = only_person.gauge_height()
         self.assertEqual(size_photo['h'], 200)
-
-
-class HomePageTest(TestCase):
-    def test_home_page(self):
-        """Test home page"""
-        c = Client()
-        response = c.get(reverse('hello:home'))
-
-        person = Person.objects.first()
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context['person'], person)
-
-    def test_home_page_returns_correct_html(self):
-        """Test home_page returns correct html"""
-        request = HttpRequest()
-        response = home_page(request)
-        self.assertTrue(response.content.strip().
-                        startswith(b'<!DOCTYPE html>'))
-        self.assertIn(b'<title>Visiting Card</title>', response.content)
-        self.assertTrue(response.content.strip().endswith(b'</html>'))
 
 
 class RequestStoreTest(TestCase):
@@ -133,62 +139,6 @@ class RequestMiddlewareTests(TestCase):
         self.assertEquals(len(rs), 2)
         only_one_rs = rs[1]
         self.assertEqual(only_one_rs.path, reverse('hello:home'))
-
-
-class RequestAjaxTest(TestCase):
-    def test_request_ajax_view(self):
-        """Test request_ajax view"""
-        RequestStore.objects.create(path='/', method='GET')
-        c = Client()
-        response = c.get(reverse('hello:request_ajax'),
-                         HTTP_X_REQUESTED_WITH='XMLHttpRequest')
-        self.assertIn('GET', response.content)
-        self.assertEqual(response.status_code, 200)
-
-
-class HomePageViewTest(TestCase):
-    def setUp(self):
-        self.factory = RequestFactory()
-        self.person = Person.objects.first()
-
-    def test_home_page_view(self):
-        """Test view home_page"""
-        request = self.factory.get(reverse('hello:home'))
-        response = home_page(request)
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(self.person.name, response.content)
-
-
-class RequestViewTest(TestCase):
-    def setUp(self):
-        self.client = Client()
-        self.request_store = RequestStore
-
-    def test_request_view(self):
-        """Test view request_view"""
-
-        # middleware don't store request to request_view page
-        response = self.client.get(reverse('hello:request'))
-        all_store_obj = self.request_store.objects.all()
-        self.assertQuerysetEqual(all_store_obj, [])
-        self.assertEqual(response.status_code, 200)
-        self.assertIn('Requests', response.content)
-
-        # middleware store request to home_page page
-        response = self.client.get(reverse('hello:home'))
-        all_store_obj = self.request_store.objects.all()
-        store_obj = all_store_obj[0]
-        self.assertEqual(len(all_store_obj), 1)
-        self.assertEqual(store_obj.path, reverse('hello:home'))
-        self.assertEqual(store_obj.new_request, 1)
-
-        # new_request fields update to 0, if request_page is requested by admin
-        self.client.login(username='admin', password='admin')
-        response = self.client.get(reverse('hello:request'))
-        all_store_obj = self.request_store.objects.all()
-        store_obj = all_store_obj[0]
-        self.assertEqual(len(all_store_obj), 1)
-        self.assertEqual(store_obj.new_request, 0)
 
 
 class FormTest(TestCase):
