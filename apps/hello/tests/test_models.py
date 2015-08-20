@@ -115,4 +115,3 @@ class NoteModelTestCase(TestCase):
         " Test processor."
         note = NoteModel.objects.get(model='Person')
         self.assertEqual(note.action_type, 0)
-        

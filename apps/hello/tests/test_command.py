@@ -4,7 +4,10 @@ from django.test import TestCase
 from django.core.management import call_command
 from django.utils.six import StringIO
 
-from .models import Person
+from datetime import date
+
+from ..models import Person
+
 
 class CommandsTestCase(TestCase):
     def test_showmodels(self):
