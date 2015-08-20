@@ -33,8 +33,7 @@ def request_ajax(request):
     if request.is_ajax():
         new_request = RequestStore.objects.filter(new_request=1).count()
         request_list = RequestStore.objects.all()[:10]
-        list = serializers.serialize("json", request_list) 
-        r = [{'list': list, 'num': new_request}]
+        list = serializers.serialize("json", request_list)
         data = json.dumps((new_request, list))
         print data
         return HttpResponse(data, content_type="application/json")
