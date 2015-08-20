@@ -1,30 +1,25 @@
 var helloRequest = (function($){
 
   function handleRequest(data) {
+     console.log(data);
     var items = ['<thead><tr><th>Path</th>\
                  <th>Method</th><tr></thead>'];
-    var j_data = $.parseJSON(data);
-    var id = 0;
+                 
+    var j_data = $.parseJSON(data[1]);
+    var id = data[0];
     $.each(j_data, function(i, val) {
-      id += parseInt(val.fields.new_request, 10);
-      if (i < 10 ){
-          if (parseInt(val.fields.new_request, 10) != 0){
-               items.push('<tr id="' + val.pk + '">'
-                          + '<td><strong>' + val.fields.path + '</strong></td>'
-                          + '<td><strong>'+ val.fields.method + '</strong></td>'
-                          + '</tr>');
-          }else{
-              items.push('<tr id="' + val.pk + '">'
-                   + '<td>' + val.fields.path + '</td>'
-                   + '<td>'+ val.fields.method + '</td>'
-                   + '</tr>');
-          }
-    }
+        items.push('<tr>'
+                    + '<td>' + val.fields.path + '</td>'
+                    + '<td>' + val.fields.method + '</td>'
+                    + '</tr>'
+        );
    });
    var title = $('title').text().split('-')[1] || $('title').text();
    var pre_titile = id ? id + '-' : '';
    $('#request').html(items);
    $('title').text(pre_titile + title);
+   var str_elem = parseInt(id) + 2;
+   $('tr:lt('+str_elem+')').not('tr th').addClass('req');
  }
 
  return {
