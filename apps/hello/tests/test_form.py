@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from django.test import TestCase
-from django.core.urlresolvers import reverse
 
 from datetime import date
 
@@ -25,12 +24,3 @@ class FormTest(TestCase):
         form = PersonForm(data=form_data)
 
         self.assertEqual(form.is_valid(), True)
-
-    def test_form_page_view(self):
-        """Test view form_page"""
-        response = self.client.get(reverse('hello:form'))
-        self.assertEqual(response.status_code, 302)
-
-        self.client.login(username='admin', password='admin')
-        response = self.client.get(reverse('hello:form'))
-        self.assertIn('name', response.content)
