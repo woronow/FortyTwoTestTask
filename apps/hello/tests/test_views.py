@@ -79,5 +79,5 @@ class FormPageTest(TestCase):
     def test_form_page_view(self):
         """Test view form_page"""
 
-        response = self.clent.get(reverse('hello:form'))
+        response = self.client.get(reverse('hello:form'))
         self.assertEqual(response.status_code, 302)

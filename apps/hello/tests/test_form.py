@@ -2,7 +2,9 @@
 from __future__ import unicode_literals
 from django.test import TestCase
 
-from .forms import PersonForm
+from datetime import date
+
+from ..forms import PersonForm
 
 
 class FormTest(TestCase):
