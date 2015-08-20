@@ -23,7 +23,7 @@ def home_page(request):
 
 @not_record_request
 def request_view(request):
-    if request.user.username == 'admin':
+    if request.user.is_authenticated():
         RequestStore.objects.filter(new_request=1).update(new_request=0)
     return render(request, 'request.html')
 
@@ -31,7 +31,8 @@ def request_view(request):
 @not_record_request
 def request_ajax(request):
     if request.is_ajax():
-        request_list = RequestStore.objects.all()
+        request_list = RequestStore.objects.filter(new_request=1)
+        print request_list
         r = serializers.serialize("json", request_list)
         data = json.dumps(r)
 
