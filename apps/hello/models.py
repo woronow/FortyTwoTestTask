@@ -4,6 +4,7 @@ from django.db import models
 from django.conf import settings
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
+from django.db.utils import OperationalError
 
 
 class Person(models.Model):
@@ -85,7 +86,10 @@ def models_handler(sender, **kwargs):
                 action_type = 0
             elif update_fields is not None:
                 action_type = 1
-            note = NoteModel(model=model,
-                             inst=instance,
-                             action_type=action_type)
-            note.save()
+            try:
+                note = NoteModel(model=model,
+                                 inst=instance,
+                                 action_type=action_type)
+                note.save()
+            except OperationalError:
+                pass
